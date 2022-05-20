@@ -8,22 +8,26 @@ using System.Threading.Tasks;
 
 namespace ServerCore {
     public class Connector {
-        private Socket _socket = null;
-        private Action<Session> _onConnectedHandler;
+        private Func<Session> _sessionFactory;
 
-        public void Connect(IPEndPoint endPoint, Action<Session> OnConnectedHandler) {
-            _socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        public void Connect(IPEndPoint endPoint, Func<Session> sessionFactory, int count = 10) {
+            _sessionFactory = sessionFactory;
 
-            SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnectCompleted);
-            args.RemoteEndPoint = endPoint;
-            _onConnectedHandler = OnConnectedHandler;
+            for(int i = 0; i < count; i++) {
+                Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            RegisterConnect(args);
+                SocketAsyncEventArgs args = new SocketAsyncEventArgs();
+                args.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnectCompleted);
+                args.RemoteEndPoint = endPoint;
+                args.UserToken = socket as object;
+
+                RegisterConnect(args);
+            }
         }
 
         private void RegisterConnect(SocketAsyncEventArgs args) {
-            bool pending = _socket.ConnectAsync(args);
+            Socket socket = args.UserToken as Socket;
+            bool pending = socket.ConnectAsync(args);
 
             if(pending == false)
                 OnConnectCompleted(null, args);
@@ -32,10 +36,9 @@ namespace ServerCore {
         private void OnConnectCompleted(object sender, SocketAsyncEventArgs args) {
             if(args.SocketError == SocketError.Success) {
                 Console.WriteLine($"Connected to {args.ConnectSocket.RemoteEndPoint}");
-                Session session = new Session(args.ConnectSocket);
-                session.Initialize();
-                if(_onConnectedHandler != null)
-                    _onConnectedHandler.Invoke(session);
+                Session session = _sessionFactory.Invoke();
+                session.Initialize(args.ConnectSocket);
+                session.OnConnected();
             }
         }
     }

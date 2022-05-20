@@ -9,7 +9,10 @@ using System.Threading.Tasks;
 namespace ServerCore {
     public  class Listener {
         private Socket _listenSocket;
-        public void Init(IPEndPoint endPoint, int backlog = 10) {
+        private Func<Session> _sessionFactory;
+        public void Init(IPEndPoint endPoint, Func<Session> sessionFactory, int backlog = 10) {
+            _sessionFactory = sessionFactory;
+
             _listenSocket = new Socket(endPoint.AddressFamily, 
                                        SocketType.Stream,
                                        ProtocolType.Tcp);
@@ -37,8 +40,9 @@ namespace ServerCore {
             if(args.SocketError == SocketError.Success) {
                 //TODO: 세션 생성 및 연결
                 Console.WriteLine($"Connected to: {args.AcceptSocket.RemoteEndPoint}");
-                Session session = new Session(args.AcceptSocket);
-                session.Initialize();
+                Session session = _sessionFactory.Invoke();
+                session.Initialize(args.AcceptSocket);
+                session.OnConnected();
             }
 
             args.AcceptSocket = null;

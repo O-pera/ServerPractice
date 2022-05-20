@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "dnOsHu7GY9+GUL7DAUQ6lm0jkXtCfq2enWCyhqqBh2CaZseh31k3oM+RD9tdeWgmtAx+0TRPV/lAjTEktqZ57g==",
+  "dgSpecHash": "Ge8ZBQ6Xo+g7nkyVc1Y2g0bdhSOlAY4g1N9EIBn8E40x12qIV/tXQgnVV9YRMAgfFmI8FhX7mx8kWX7WHZVvew==",
   "success": true,
-  "projectFilePath": "D:\\Projects\\MyGameServer\\Server\\Client\\Client.csproj",
+  "projectFilePath": "D:\\Projects\\MyGameServer\\ServerPractice\\Server\\Client\\Client.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

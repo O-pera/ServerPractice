@@ -6,10 +6,49 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServerCore {
-    public class Session {
-        protected Socket _socket;
-        protected int _disconnected = 1;
+    public abstract class PacketSession : Session {
+        protected static int Header_Size = 2;
 
+        public sealed override int OnRecv(ArraySegment<byte> segment) {
+            int processLen = 0;
+            int processCount = 0;
+
+            while(true) {
+                if(segment.Count < Header_Size)
+                    break;
+
+                ushort size = BitConverter.ToUInt16(segment.Array, 0);
+                if(segment.Count < size)
+                    break;
+
+                processLen += size;
+                ArraySegment<byte> pSegment = new ArraySegment<byte>(segment.Array, 0, size);
+                OnRecvPacket(pSegment); processCount++;
+
+                segment = new ArraySegment<byte>(segment.Array, segment.Offset + size, segment.Count - size);
+            }
+
+            return processLen;
+        }
+
+        public abstract void OnRecvPacket(ArraySegment<byte> segment);
+    }
+
+    public abstract class Session {
+
+        protected Socket _socket;
+        public string Socket { 
+            get {
+                if(Disconnected)
+                    return "Nothing's Connected";
+                else
+                    return _socket.RemoteEndPoint.ToString();
+            } 
+        }
+        protected int _disconnected = -1;
+        protected bool Disconnected {
+            get { return _disconnected == 1; }
+        }
 
         private SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
         private object _lock = new object();
@@ -17,14 +56,11 @@ namespace ServerCore {
         private SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
         private RecvBuffer _recvBuffer = new RecvBuffer(65535);
 
-
-        public Session(Socket socket) {
-            _socket = socket;
-        }
-
-        public void Initialize() {
+        public virtual void Initialize(Socket socket) {
             if(Interlocked.Exchange(ref _disconnected, 0) == 0)
                 return;
+
+            _socket = socket;
 
             _sendArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSendCompleted);
             _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
@@ -47,33 +83,35 @@ namespace ServerCore {
         }
 
         #region Send Functions
-        public void Send() {
-            if(_disconnected == 1 || _socket == null)
+        public void Send(ArraySegment<byte> packet) {
+            if(Disconnected || _socket == null)
                 return;
 
-            string data = "FUCKING HELL";
-            byte[] buffer = Encoding.UTF8.GetBytes(data);
-
-            RegisterSend(new ArraySegment<byte>(buffer, 0, buffer.Length));
+            RegisterSend(packet);
         }
         private void RegisterSend(ArraySegment<byte> buffer) {
-            lock(_lock) {
-                _sendArgs.SetBuffer(buffer);
-                bool pending = _socket.SendAsync(_sendArgs);
+            try {
+                lock(_lock) {
+                    _sendArgs.SetBuffer(buffer);
+                    bool pending = _socket.SendAsync(_sendArgs);
 
-                if(pending == false)
-                    OnSendCompleted(null, _sendArgs);
+                    if(pending == false)
+                        OnSendCompleted(null, _sendArgs);
+                }
+            } catch(Exception e) {
+                Console.WriteLine($"RegisterSend Failed: {e.ToString()}");
             }
         }
 
         private void OnSendCompleted(object sender, SocketAsyncEventArgs args) {
 
         }
+
         #endregion
 
         #region Recv Functions
         private void RegisterRecv() {
-            if(_disconnected == 1 || _socket == null)
+            if(Disconnected || _socket == null)
                 return;
 
             _recvBuffer.Clear();
@@ -88,18 +126,40 @@ namespace ServerCore {
 
         private void OnRecvCompleted(object sender, SocketAsyncEventArgs args) {
             if(args.BytesTransferred > 0 && args.SocketError == SocketError.Success) {
-                if(_recvBuffer.OnWrite(args.BytesTransferred) == false)
-                    return;
+                try {
+                    if(_recvBuffer.OnWrite(args.BytesTransferred) == false) {
+                        Disconnect();
+                        return;
+                    }
 
-                Console.WriteLine($"From:[{_socket.RemoteEndPoint}] Data: [{Encoding.UTF8.GetString(_recvBuffer.DataSegment)}]");
+                    int processLen = OnRecv(_recvBuffer.DataSegment);
 
-                if(_recvBuffer.OnRead(args.BytesTransferred) == false)
-                    return;
+                    if(args.BytesTransferred != processLen) {
+                        Disconnect();
+                        return;
+                    }
 
+                    if(_recvBuffer.OnRead(args.BytesTransferred) == false) {
+                        Disconnect();
+                        return;
+                    }
 
-                RegisterRecv();
+                    RegisterRecv();
+                }
+                catch(Exception e) {
+                    Console.WriteLine($"OnRecvCompleted Failed: {e.ToString()}");
+                }
             }
         }
+        #endregion
+
+        #region Abstract Functions
+
+        public abstract void OnConnected();
+        public abstract void OnSend();
+        public abstract int OnRecv(ArraySegment<byte> segment);
+        public abstract void OnDisconnected();
+
         #endregion
     }
 }
