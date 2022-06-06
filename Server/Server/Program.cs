@@ -1,29 +1,35 @@
-﻿using Server.Packet;
+﻿using Server.Contents;
+using Server.Session;
 using ServerCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Server {
     public class Program {
-        public static Listener _listener = new Listener();
+        private static Listener _listener = new Listener();
 
         public static void Main(string[] args) {
-            PacketManager.Instance.Initialize();
-            string host = Dns.GetHostName();
+            InitializeServer();
+        }
+
+        private static void InitializeServer() {
+            string host = Dns.GetHostName();    //www.naver.com
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
-            _listener.Init(endPoint, () => { return new ClientSession(); });
-
+            _listener.Start(endPoint, SessionManager.Instance.Generate, count: 10);
+            
             while(true) {
-                Thread.Sleep(1000);
-                Console.WriteLine("Server Running....");
+
             }
         }
+
+
     }
 }

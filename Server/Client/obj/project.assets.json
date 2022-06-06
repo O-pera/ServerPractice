@@ -33,11 +33,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Projects\\MyGameServer\\ServerPractice\\Server\\Client\\Client.csproj",
+      "projectUniqueName": "D:\\Projects\\Server\\ServerPractice\\Server\\Client\\Client.csproj",
       "projectName": "Client",
-      "projectPath": "D:\\Projects\\MyGameServer\\ServerPractice\\Server\\Client\\Client.csproj",
+      "projectPath": "D:\\Projects\\Server\\ServerPractice\\Server\\Client\\Client.csproj",
       "packagesPath": "C:\\Users\\16624\\.nuget\\packages\\",
-      "outputPath": "D:\\Projects\\MyGameServer\\ServerPractice\\Server\\Client\\obj\\",
+      "outputPath": "D:\\Projects\\Server\\ServerPractice\\Server\\Client\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -58,8 +58,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "D:\\Projects\\MyGameServer\\ServerPractice\\Server\\ServerCore\\ServerCore.csproj": {
-              "projectPath": "D:\\Projects\\MyGameServer\\ServerPractice\\Server\\ServerCore\\ServerCore.csproj"
+            "D:\\Projects\\Server\\ServerPractice\\Server\\ServerCore\\ServerCore.csproj": {
+              "projectPath": "D:\\Projects\\Server\\ServerPractice\\Server\\ServerCore\\ServerCore.csproj"
             }
           }
         }

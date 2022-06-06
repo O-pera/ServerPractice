@@ -1,28 +1,26 @@
-﻿using Client.Packet;
+﻿using Client.Session;
 using ServerCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Client {
-    public class Program {
+    public class Program{
         private static Connector _connector = new Connector();
-
         public static void Main(string[] args) {
-            PacketManager.Instance.Initialize();
-            string host = Dns.GetHostName();
+            string host = Dns.GetHostName();    //www.naver.com
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
-            _connector.Connect(endPoint, () => { return new ServerSession(); }, 10);
+            _connector.Connect(endPoint, SessionManager.Instance.Generate, 51);
 
             while(true) {
                 Thread.Sleep(1000);
+                SessionManager.Instance.SendForEach();
             }
         }
     }

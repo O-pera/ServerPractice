@@ -6,48 +6,46 @@ using System.Threading.Tasks;
 
 namespace ServerCore {
     public class RecvBuffer {
-        private byte[] _buffer;
-        private int _write, _read;
-        private object _lock = new object();
+        ArraySegment<byte> _buffer;
+        private int _readPos, _writePos;
 
-        public RecvBuffer(int bufferSize) {
-            _buffer = new byte[bufferSize];
-            _write = _read = 0;
+        public int DataSize { get { return _writePos - _readPos; } }
+        public int FreeSize { get { return _buffer.Count - _writePos; } }
+
+        public RecvBuffer(int chunkSize) {
+            _buffer = new ArraySegment<byte>(new byte[chunkSize], 0, chunkSize);
+            _readPos = _writePos = 0;
         }
 
-        private int FreeSize { get { return _buffer.Length - _read; } }
-        private int DataSize { get { return _write - _read; } }
+        public ArraySegment<byte> DataSegment { get { return new ArraySegment<byte>(_buffer.Array, _buffer.Offset + _readPos, DataSize); } }
+        public ArraySegment<byte> FreeSegment { get { return new ArraySegment<byte>(_buffer.Array, _buffer.Offset + _writePos, FreeSize); } }
 
-        public ArraySegment<byte> WriteSegment { get { return new ArraySegment<byte>(_buffer, _write, FreeSize); } }
-        public ArraySegment<byte> DataSegment { get { return new ArraySegment<byte>(_buffer, _read, DataSize); } }
-
-        public bool OnWrite(int transferred) {
-            if(transferred > FreeSize)
+        public bool OnWrite(int numOfBytes) {
+            if(numOfBytes > FreeSize)
                 return false;
 
-            _write += transferred;
+            _writePos += numOfBytes;
             return true;
         }
 
-        public bool OnRead(int transferred) {
-            int dataSize = DataSize;
-            if(transferred != DataSize)
+        public bool OnRead(int numOfBytes) {
+            if(numOfBytes > DataSize)
                 return false;
 
-            _read += transferred;
+            _readPos += numOfBytes;
             return true;
         }
 
         public void Clear() {
-            lock(_lock) {
-                if(DataSize == 0) {
-                    _read = _write = 0;
-                }
-                else {
-                    int dataSize = DataSize;
-                    Array.Copy(_buffer, _write, _buffer, 0, dataSize);
-                    _read = 0; _write = dataSize;
-                }
+            int dataSize = DataSize;
+
+            if(dataSize == 0) {
+                _readPos = _writePos = 0;
+            }
+            else {
+                Array.Copy(_buffer.Array, _buffer.Offset + _readPos, _buffer.Array, _buffer.Offset, dataSize);
+                _readPos = 0;
+                _writePos = dataSize;
             }
         }
     }
