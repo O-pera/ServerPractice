@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package Protocol;
+import "google/protobuf/timestamp.proto";
+option csharp_namespace = "Google.Protobuf.Protocol";
+
+enum MsgID{
+	C_CHAT = 0;
+	S_BROADCAST_CHAT = 1;
+	C_TEST = 2;
+	S_BROADCAST_TEST = 3;
+}
+
+message C_Chat{
+	string message = 1;
+}
+
+message S_Broadcast_Chat{
+	int32 sessionID = 1;
+	string message = 2;
+}
+
+message C_Test{
+	int32 test = 1;
+}
+
+message S_Broadcast_Test{
+	int32 sessionID = 1;
+	int32 test = 2;
+}

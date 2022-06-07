@@ -1,4 +1,5 @@
-﻿using Server.Contents;
+﻿using Google.Protobuf.Protocol;
+using Server.Contents;
 using Server.Session;
 using ServerCore;
 using System;
@@ -24,6 +25,7 @@ namespace Server {
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
             _listener.Start(endPoint, SessionManager.Instance.Generate, count: 10);
+            
             
             while(true) {
 
