@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ServerCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,31 +7,43 @@ using System.Threading.Tasks;
 
 namespace Server.Session {
     public class SessionManager {
-        public static SessionManager Instance { get; } = new SessionManager();
-        private Dictionary<int, ClientSession> _sessions = new Dictionary<int, ClientSession>();
-        private object l_sessions = new object();
-        private int _sessionID = 0;
+        #region Singleton
+        private static SessionManager _instance;
+        public static SessionManager Instance { 
+            get {
+                if(_instance == null)
+                    _instance = new SessionManager();
+                return _instance; 
+            } 
+        }
+        static SessionManager() {
+            _instance = new SessionManager();
+        }
+        #endregion
 
-        public ClientSession Generate() {
+        private Dictionary<int, PacketSession> _sessions = new Dictionary<int, PacketSession>();
+        object l_sessions = new object();
+        private int _sessionID = 0;
+        public T Generate<T>() where T: PacketSession, new(){
+            int sessionID = Interlocked.Exchange(ref _sessionID, _sessionID + 1);
+            T session = new T(){SessionID = sessionID};
+
             lock(l_sessions) {
-                ClientSession session = new ClientSession();
-                session.SessionID = _sessionID++;
-                _sessions.Add(session.SessionID, session);
-                return session;
+                _sessions.Add(sessionID, session);
             }
+
+            return session;
         }
 
-        public bool RemoveSession(ClientSession session) {
-            try {
+        public void Remove(PacketSession session) {
+            if(session != null) {
                 lock(l_sessions) {
-                    bool success = _sessions.Remove(session.SessionID);
-
-                    return success;
+                    session.Disconnect();
+                    _sessions.Remove(session.SessionID);
                 }
-            }catch(Exception e) {
-                Console.WriteLine($"RemoveSession Failed: {e}");
-                return false;
             }
         }
     }
+
+
 }

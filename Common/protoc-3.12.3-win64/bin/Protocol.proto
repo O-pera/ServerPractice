@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package Protocol;
+import "google/protobuf/timestamp.proto";
+option csharp_namespace = "Google.Protobuf.Protocol";
+
+enum MsgID{
+	//option allow_alias = true;	//Other Enums can get same numerics
+	C_ENTER = 0;
+	S_ENTER_RESPONSE = 1;
+	C_MOVE = 2;
+	S_BROADCAST_MOVE = 3;
+}
+
+message C_Enter{ 
+}
+
+message S_Enter_Response{ 
+	int32 sessionID = 1;
+}
+
+message C_Move{
+	Position pos = 1;
+}
+
+message S_Broadcast_Move{
+	int32 sessionID = 1;
+	Position pos = 2;
+}
+
+message Position{
+	float x = 1;
+	float y = 2;
+	float z = 3;
+}

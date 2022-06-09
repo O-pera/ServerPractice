@@ -21,7 +21,7 @@ namespace PacketGenerator {
         public static string serverHandler = "";
         public static string serverHandlerRegister = "";
         public static void Main(string[] args) {
-            string filePath = "../../../../../Common/protoc-21.1-win64/bin/Protocol.proto";
+            string filePath = "../../../../../Common/protoc-3.12.3-win64/bin/Protocol.proto";
             if(args.Length >= 1) {
                 filePath = args[0];
             }

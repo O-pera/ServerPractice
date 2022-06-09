@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "NUx2BE/OrWWzLOJZyZlKjDO/PzS7NwVGxUEiWWUJ6EaB+aEvlAZEuksOChJm6xoFL0HV59tln7lz2G2BwXhqpA==",
+  "dgSpecHash": "FPCeySPyJMxETwSFbTTDru9p09l4PzJAtgVx0Dowas3B7E6yrcDYSpseax2RhBlea95+C790H1TSwDcALoLkfA==",
   "success": true,
   "projectFilePath": "D:\\Projects\\Server\\Practice\\Server\\Client\\Client.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\16624\\.nuget\\packages\\google.protobuf\\3.21.1\\google.protobuf.3.21.1.nupkg.sha512"
+    "C:\\Users\\16624\\.nuget\\packages\\google.protobuf\\3.12.3\\google.protobuf.3.12.3.nupkg.sha512",
+    "C:\\Users\\16624\\.nuget\\packages\\system.memory\\4.5.2\\system.memory.4.5.2.nupkg.sha512"
   ],
   "logs": []
 }

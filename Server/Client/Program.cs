@@ -8,15 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Client {
-    public class Program{
+    public class Program {
         private static Connector _connector = new Connector();
         public static void Main(string[] args) {
-            string host = Dns.GetHostName();    //www.naver.com
+            string host = Dns.GetHostName();
             IPHostEntry ipHost = Dns.GetHostEntry(host);
             IPAddress ipAddr = ipHost.AddressList[0];
             IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
-            _connector.Connect(endPoint, SessionManager.Instance.Generate, 51);
+            _connector.Connect(endPoint, SessionManager.Instance.Generate<ServerSession>, 30);
 
             while(true) {
                 Thread.Sleep(1000);

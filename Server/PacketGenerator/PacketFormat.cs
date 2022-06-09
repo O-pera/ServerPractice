@@ -29,13 +29,13 @@ public class PacketManager {{
     private Dictionary<ushort, Action<PacketSession, ArraySegment<byte>, ushort>> _makeFunc = new Dictionary<ushort, Action<PacketSession, ArraySegment<byte>, ushort>>();
     private Dictionary<ushort, Action<PacketSession, IMessage>> _handler = new Dictionary<ushort, Action<PacketSession, IMessage>>();
 
-    public Action<PacketSession, IMessage> CustomHandler {{ get; set; }} = null;
+    public Action<ushort, IMessage> CustomHandler {{ get; set; }} = null;
 
     private void Register() {{
 {0}
     }}
 
-    public void OnRecvPacket(PacketSession session, ArraySegment<byte> segment, Action<IMessage> onRecvCallback = null) {{
+    public void OnRecvPacket(PacketSession session, ArraySegment<byte> segment) {{
         ushort count = 0;
 
         ushort size = BitConverter.ToUInt16(segment.Array, segment.Offset + count);
@@ -54,7 +54,7 @@ public class PacketManager {{
         pkt.MergeFrom(segment.Array, segment.Offset + 4, segment.Count - 4);
 
         if(CustomHandler != null) {{
-            CustomHandler.Invoke(session, pkt);
+            CustomHandler.Invoke(msgID, pkt);
         }}
         else {{
             Action<PacketSession, IMessage> action = null;
@@ -91,6 +91,7 @@ public class PacketManager {{
 using {0}.Session;
 using ServerCore;
 using Google.Protobuf.Protocol;
+using System;
 
 public static class PacketHandler {{
     {1}

@@ -8,39 +8,45 @@ namespace ServerCore {
     public interface IJobQueue {
         public void Push(Action action);
     }
-    public class JobQueue : IJobQueue{
-        private Queue<Action> _queue = new Queue<Action>();
-        private object l_queue = new object();
+    public class JobQueue : IJobQueue {
+        private Queue<Action> _jobQueue = new Queue<Action>();
+        private object l_jobQueue = new object();
+        private bool _flushing = false;
 
         public void Push(Action action) {
-            lock(l_queue) {
-                _queue.Enqueue(action);
+            if(action == null)
+                return;
+            bool needFlush = false;
+
+            lock(l_jobQueue) {
+                _jobQueue.Enqueue(action);
+                if(_flushing == false)
+                    _flushing = needFlush = true;
             }
+
+            if(needFlush)
+                Flush();
         }
 
         public Action Pop() {
-            lock(l_queue) {
-                return _queue.Dequeue();
-            }
-        }
+            if(_jobQueue.Count == 0)
+                return null;
 
-        public List<Action> PopAll() {
-            lock(l_queue) {
-                List<Action> list = new List<Action>();
-                foreach(Action action in _queue) {
-                    list.Add(action);
-                }
-
-                return list;
+            lock(l_jobQueue) {
+                return _jobQueue.Dequeue();
             }
         }
 
         public void Flush() {
-            lock(l_queue) {
-                foreach(Action action in _queue) {
-                    action.Invoke();
-                }
+            Action action = null;
+
+            while(true) {
+                action = Pop();
+                if(action == null)   break;
+                action.Invoke();
             }
+
+            _flushing = false;
         }
     }
 }
