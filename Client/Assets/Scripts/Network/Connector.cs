@@ -39,8 +39,8 @@ namespace ServerCore {
         private void OnConnectCompleted(object? sender, SocketAsyncEventArgs args) {
             if(args.SocketError == SocketError.Success) {
                 Session session = _sessionFactory.Invoke();
-                session.Start(args.ConnectSocket);
                 session.OnConnect(args.ConnectSocket.RemoteEndPoint);
+                session.Start(args.ConnectSocket);
             }
         }
     }

@@ -6,12 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Client.Session {
     public class ServerSession : PacketSession {
         public override void OnConnect(EndPoint endPoint) {
-
+            if(Interlocked.Exchange(ref _disconnected, 0) == 0)
+                Disconnect();
         }
 
         public override void OnDisconnect(EndPoint endPoint) {

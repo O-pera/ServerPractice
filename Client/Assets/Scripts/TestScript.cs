@@ -29,7 +29,7 @@ public class TestScript : MonoBehaviour{
 
     IEnumerator CoSendPacket() {
         C_Enter enterPacket = new C_Enter();
-        Managers.Network.Send(enterPacket);
+        //Managers.Network.Send(enterPacket);
         yield return null;
     }
 }

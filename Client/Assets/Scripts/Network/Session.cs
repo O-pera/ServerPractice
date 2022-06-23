@@ -33,7 +33,7 @@ namespace ServerCore {
     }
     public abstract class Session {
         private Socket _socket;
-        private int _disconnected = 0;
+        protected int _disconnected = 1;
         public bool Connected { get { return _disconnected == 0; } }
         public int SessionID { get; set; }
 

@@ -18,8 +18,8 @@ public static class PacketHandler {
         ServerSession session = (ServerSession)s;
 
         //TODO: Manage Object's Trnasform
-        if(session.SessionID == parsedPacket.SessionID)
-            return;
+        //if(session.SessionID == parsedPacket.SessionID)
+        //    return;
 
         Console.WriteLine($"Other Client{parsedPacket.SessionID} Moved To X:{parsedPacket.Pos.X} Y: {parsedPacket.Pos.Y} Z: {parsedPacket.Pos.Z}");
     }

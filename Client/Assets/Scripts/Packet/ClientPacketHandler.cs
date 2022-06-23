@@ -10,14 +10,18 @@ public static class PacketHandler {
         S_Enter_Response parsedPacket = (S_Enter_Response)packet;
         ServerSession session = (ServerSession)s;
 
-        Debug.Log("Room Entered!");
+        session.SessionID = parsedPacket.SessionID;
+
+        Debug.Log($"I'm {session.SessionID}!");
     }
     public static void S_Broadcast_MoveHandler(PacketSession s, IMessage packet) {
         S_Broadcast_Move parsedPacket = (S_Broadcast_Move)packet;
         ServerSession session = (ServerSession)s;
 
         //TODO: Manage Object's Trnasform
+        //if(session.SessionID == parsedPacket.SessionID)
+        //    return;
 
-        Debug.Log($"Client{parsedPacket.SessionID} Moved To X:{parsedPacket.Pos.X} Y: {parsedPacket.Pos.Y} Z: {parsedPacket.Pos.Z}");
+        Debug.Log($"Other Client{parsedPacket.SessionID} Moved To X:{parsedPacket.Pos.X} Y: {parsedPacket.Pos.Y} Z: {parsedPacket.Pos.Z}");
     }
 }
