@@ -33,7 +33,7 @@ namespace MMO_EFCore {
         public int PlayerID { get; set; }   //DB에서 PK가 된다.
         public string Name { get; set; }
 
-        public ICollection<Item> Items { get; set; }
+        public Item Item { get; set; }
         public Guild Guild { get; set; }
     }
 
@@ -49,6 +49,7 @@ namespace MMO_EFCore {
     //컨텐츠에 넘기기 전 데이터를 재가공하는 용도로 사용
 
     public class GuildDto { 
+        public int GuildID { get; set; }
         public string Name { get; set; }
         public int MemberCount { get; set; }
     }

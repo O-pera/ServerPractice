@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ez6XqB2PXU8vfBKT58CnKLwgmgp85+omJIB2q0i7Y8aIeQ8+m62SmQA0IemZpTmTo6u4EUOCii5JwoT2jfWfRQ==",
+  "dgSpecHash": "ZdQeQHISMJFUrzqRG6Tmc6KE0tEki+wcy+R/Tc2EADfNMJYnvGIprMsP2r5/OOfLElw80ynAgqgkL3sCemuMNw==",
   "success": true,
-  "projectFilePath": "D:\\Projects\\Server\\MMO_EFCore\\MMO_EFCore\\MMO_EFCore.csproj",
+  "projectFilePath": "D:\\Projects\\Server\\Practice\\MMO_EFCore\\MMO_EFCore\\MMO_EFCore.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\16624\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\16624\\.nuget\\packages\\microsoft.data.sqlclient\\2.1.4\\microsoft.data.sqlclient.2.1.4.nupkg.sha512",
@@ -30,6 +30,7 @@
     "C:\\Users\\16624\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\16624\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\16624\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\16624\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
     "C:\\Users\\16624\\.nuget\\packages\\system.collections.immutable\\6.0.0\\system.collections.immutable.6.0.0.nupkg.sha512",
     "C:\\Users\\16624\\.nuget\\packages\\system.configuration.configurationmanager\\4.7.0\\system.configuration.configurationmanager.4.7.0.nupkg.sha512",
     "C:\\Users\\16624\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.0\\system.diagnostics.diagnosticsource.6.0.0.nupkg.sha512",
