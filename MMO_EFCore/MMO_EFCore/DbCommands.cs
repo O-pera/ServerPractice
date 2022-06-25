@@ -39,7 +39,7 @@ namespace MMO_EFCore {
         public static void CreateTestData(AppDbContext db) {
             Player opera = new Player(){ Name = "O-pera" };
             Player faker = new Player(){ Name = "Faker" };
-            Player daft = new Player(){ Name = "Daft" };
+            EventPlayer daft = new EventPlayer(){ Name = "Daft", DestroyDate = DateTime.Now};
 
             // TODO: 1. Detached -> 메모리에만 존재하고 DbSet 프로퍼티에 추가되지 않았기 때문에 Detached상태이다.
             Console.WriteLine($"{db.Entry(opera).State}");
@@ -61,6 +61,24 @@ namespace MMO_EFCore {
                     Owner = daft
                 }
             };
+
+            //Test Shadow Property Value Write
+            db.Entry(items[0]).Property("RecoveredDate").CurrentValue = DateTime.Now;
+
+            //Test Backing Field
+            items[0].SetOption(new ItemOption() { dex = 1, hp = 2, str = 3 });
+
+            //Test OwnedType
+            opera.Transform = new Transform() { X = 0.0f, Y = 0.1f, Z = 0.2f };
+
+            //Test Table Splitting
+            items[0].Detail = new ItemDetail() { Description = "This is good item" };
+
+            //Test BackingField + Relationship
+            items[0].AddReview(new ItemReview() { Score = 5 });
+            items[0].AddReview(new ItemReview() { Score = 4 });
+            items[0].AddReview(new ItemReview() { Score = 2 });
+            items[0].AddReview(new ItemReview() { Score = 1 });
 
             Guild guild = new Guild(){
                 GuildName = "TestGuild",
@@ -120,8 +138,8 @@ namespace MMO_EFCore {
             string name = Console.ReadLine();
 
             using(AppDbContext db = new AppDbContext()) {
-                foreach(Player player in db.Players.AsNoTracking().Where(p => p.Name == name).Include(p => p.Item)) {
-                    Console.WriteLine($"TemplateID: {player.Item.TemplateID}");
+                foreach(Player player in db.Players.AsNoTracking().Where(p => p.Name == name).Include(p => p.OwnedItem)) {
+                    Console.WriteLine($"TemplateID: {player.OwnedItem.TemplateID}");
                 }
             }
         }
@@ -148,13 +166,13 @@ namespace MMO_EFCore {
                 Guild guild = db.Guilds.AsNoTracking()
                                        .Where(g => g.GuildName == name)
                                        .Include(g => g.Members)
-                                            .ThenInclude(p => p.Item)
+                                            .ThenInclude(p => p.OwnedItem)
                                        .First();
                 //Include에서 가져온 player에서 한번 더 Include를 하기 위해선 ThenInclude를 쓴다.
                 //한번 더 ThenInclude를 쓰면 Item으로 들어갈 수 있다.
 
                 foreach(Player player in guild.Members) {
-                    Console.WriteLine($"TemplateID: {player.Item.TemplateID} Owner: {player.Name}");
+                    Console.WriteLine($"TemplateID: {player.OwnedItem.TemplateID} Owner: {player.Name}");
                 }
             }
         }
@@ -179,7 +197,7 @@ namespace MMO_EFCore {
                 //Guild내의 Members에 들어있는 Player데이터를 guild에 가져온다.
                 foreach(Player player in guild.Members) {
                     //db.Entry(player).Collection(p => p.Items).Load();-> Item이 1:n일 경우 전부 가져오는 Collection을 쓴다.
-                    db.Entry(player).Reference(p => p.Item).Load(); //
+                    db.Entry(player).Reference(p => p.OwnedItem).Load(); //
                 }
             }
         }
@@ -208,7 +226,6 @@ namespace MMO_EFCore {
         #endregion
 
         #region CRUD: Update
-
         #region ----------Notepad----------
         /// Update 3단계 ///
         //1. Tracked Entity를 얻어온다.
@@ -228,6 +245,7 @@ namespace MMO_EFCore {
         //      2. Full Update방식 : 모든 정보를 주고받는 방식. Entity를 재생성해서 전체를 Update
 
         #endregion
+
         public static void UpdateDate() {
             Console.WriteLine("Input PlayerName:");
             Console.Write(">>> ");
@@ -336,10 +354,10 @@ namespace MMO_EFCore {
 
             using(AppDbContext db = new AppDbContext()) {
                 Player player = db.Players
-                    .Include(p => p.Item)
+                    .Include(p => p.OwnedItem)
                     .Single(p => p.PlayerID == id);
 
-                player.Item = new Item() {
+                player.OwnedItem = new Item() {
                     TemplateID = 777,
                     CreateDate = DateTime.Now
                 };
@@ -418,7 +436,7 @@ namespace MMO_EFCore {
             using(AppDbContext db = new AppDbContext()) {
                 Player player = db.Players
                     //Nullable FK가 있을 때 Include를 해주지 않으면 FK참조를 끊을 수 없기 때문에 에러가 발생한다!
-                    .Include(p => p.Item)   
+                    .Include(p => p.OwnedItem)   
                     .Single(p => p.PlayerID == id);
 
                 db.Players.Remove(player);

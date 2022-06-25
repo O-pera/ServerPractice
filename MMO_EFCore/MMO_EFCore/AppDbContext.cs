@@ -21,8 +21,12 @@ namespace MMO_EFCore {
 
         //Items에서 Owner를 참조할 때는 Players가 아무리 DbSet이 되어있더라도 Include를 사용해야 읽을 수 있다.
         public DbSet<Player> Players { get; set; }
-        public DbSet<Guild> Guilds { get; set; }
 
+        #region TPH Convention
+        //public DbSet<EventPlayer> EventPlayers { get; set; }
+        #endregion
+
+        public DbSet<Guild> Guilds { get; set; }
         
         //ConnectionString
         //DB를 연결하는 방법이 작성된 아주 긴 문자열. 각종 설정과 Authorization 등이 포함되어 있으며, 이 데이터는 민감한 정보이기 때문에 보통 config.json 파일을 따로 생성해서 관리한다.
@@ -38,10 +42,60 @@ namespace MMO_EFCore {
             //필터를 무시하고 싶으면 AppDbContext객체에서 Entity를 접근할 때 IgnoreQueryFilter 옵션을 추가하면 된다.
             builder.Entity<Item>().HasQueryFilter(i => i.SoftDeleted == false);
 
+            #region Unique Index 생성
+            //builder.Entity<Player>()
+            //                .HasIndex(p => p.Name)
+            //                .IsUnique()
+            //                .HasName("Index_PersonName");
+            #endregion
+            #region 1:n 관계 FK
+            //builder.Entity<Player>()
+            //            .HasMany(p => p.CreatedItems)
+            //            .WithOne(i => i.Creator)
+            //            .HasForeignKey(i => i.CreatorID);
+            #endregion
+            #region 1:1 관계 FK
+            //1:1 관계에선 어디에 FK를 설정할지 EFCore가 모르기 때문에 HasForeignKey에 Generic으로 FK를 가질 Entity Class를 기입한다.
+            //builder.Entity<Player>()
+            //    .HasOne(p => p.OwnedItem)
+            //    .WithOne(i => i.Owner)
+            //    .HasForeignKey<Item>(i => i.OwnerID);
+            #endregion
+            #region Shadow Property
+            builder.Entity<Item>().Property<DateTime>("RecoveredDate");
+            #endregion
+            #region Backing Field
+            builder.Entity<Item>()
+                .Property(i => i.JsonData)
+                .HasField("_jsonData");
+            #endregion
+
+            #region Ownership
             builder.Entity<Player>()
-                            .HasIndex(p => p.Name)
-                            .IsUnique()
-                            .HasName("Index_PersonName");
+                .OwnsOne(i => i.Transform);
+            #endregion
+            #region TPH FluentAPI
+            builder.Entity<Player>()
+                .HasDiscriminator(p => p.Type)
+                .HasValue<Player>(PlayerType.NormalPlayer)
+                .HasValue<EventPlayer>(PlayerType.EventPlayer);
+            #endregion
+            #region Table Splitting
+            builder.Entity<Item>()
+                .HasOne(i => i.Detail)
+                .WithOne()
+                .HasForeignKey<ItemDetail>(d => d.ItemDetailID);
+
+            builder.Entity<Item>().ToTable("Items");
+            builder.Entity<ItemDetail>().ToTable("Items");
+            #endregion
+            
+            #region BackingField + Relationship
+            builder.Entity<Item>()
+                .Metadata
+                .FindNavigation("Reviews")
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
+            #endregion
         }
     }
 }
