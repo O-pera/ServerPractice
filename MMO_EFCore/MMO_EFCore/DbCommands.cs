@@ -104,12 +104,16 @@ namespace MMO_EFCore {
                 //AsNoTracking이 수정을 가하지 않는다는 뜻. ReadOnly용도
                 //Tracking Snapshot을 통해 하지도 않은 데이터 변경이 감지되지 않도록 가져온다.
                 //Include : Eager Loading (즉시 로딩)
-                foreach(Item item in db.Items.AsNoTracking().Include(i => i.Owner)) {
-                    Console.WriteLine($"TemplateID: {item.TemplateID} Owner: {item.Owner.Name} Created: {item.CreateDate}");
+                foreach(Item item in db.Items.AsNoTracking().Include(i => i.Owner).IgnoreQueryFilters().ToList()) {
+                    if(item.SoftDeleted)
+                        Console.Write("DELETED - ");
+                    if(item.Owner == null)
+                        Console.WriteLine($"ItemID: {item.ItemID} TemplateID: {item.TemplateID} Owner: null");
+                    else
+                        Console.WriteLine($"ItemID: {item.ItemID} TemplateID: {item.TemplateID} Owner: {item.Owner.Name}");
                 }
             }
         }
-
         public static void ShowItems() {
             Console.WriteLine("Input PlayerName");
             Console.Write(">>> ");
@@ -321,6 +325,65 @@ namespace MMO_EFCore {
         }
         #endregion
 
+        #region Relationship Update
+
+        public static void Update1v1() {
+            ReadAll();
+
+            Console.WriteLine("Input ItemSwitch PlayerID");
+            Console.Write(">>> ");
+            int id = int.Parse(Console.ReadLine());
+
+            using(AppDbContext db = new AppDbContext()) {
+                Player player = db.Players
+                    .Include(p => p.Item)
+                    .Single(p => p.PlayerID == id);
+
+                player.Item = new Item() {
+                    TemplateID = 777,
+                    CreateDate = DateTime.Now
+                };
+
+                db.SaveChanges();
+            }
+
+            ReadAll();
+        }
+        public static void Update1vM() {
+            ShowGuilds();
+
+            Console.WriteLine("Input GuildID");
+            Console.Write(">>> ");
+            int id = int.Parse(Console.ReadLine());
+
+            using(AppDbContext db = new AppDbContext()) {
+                #region Include를 하지 않고 Members에 new List로 할당
+                /// Include를 하지 않고 new를 통해서 할당을 해 줄 경우 기존의 데이터에 추가한다. ///
+                //Guild guild = db.Guilds
+                //    .Single(g => g.GuildID == id);
+
+                //guild.Members = new List<Player>() {
+                //    new Player(){ Name = "Rookiss" }
+                //};
+                #endregion
+                #region Include후 Members에 new List로 할당
+                /// Include후 new를 통해서 할당을 해 줄 경우 기존의 데이터는 사라진다. ///
+                //Guild guild = db.Guilds
+                //    .Include(g => g.Members)
+                //    .Single(g => g.GuildID == id);
+
+                //guild.Members = new List<Player>() {
+                //    new Player(){ Name = "Rookiss" }
+                //};
+                #endregion
+
+                db.SaveChanges();
+            }
+            ShowGuilds();
+        }
+
+        #endregion
+
         #endregion
 
         #region CRUD: Delete
@@ -340,6 +403,49 @@ namespace MMO_EFCore {
             ReadAll();
         }
 
+        #region Dependent Data가 Principal Data 없이 존재할 수 있을까?
+        /*
+         * FK가 Nullable이 아닐 경우, Principal Data가 삭제되면 Dependent Data도 같이 삭제된다.
+         * FK가 Nullable일 경우, Principal Data와는 별개로 살아남는다. 대신 Include를 사용해서 FK를 읽을 수 있어야 한다.
+         */
+        public static void FKNullableTest() {
+            ReadAll();
+
+            Console.WriteLine("Input Delete PlayerID");
+            Console.Write(">>> ");
+            int id = int.Parse(Console.ReadLine());
+
+            using(AppDbContext db = new AppDbContext()) {
+                Player player = db.Players
+                    //Nullable FK가 있을 때 Include를 해주지 않으면 FK참조를 끊을 수 없기 때문에 에러가 발생한다!
+                    .Include(p => p.Item)   
+                    .Single(p => p.PlayerID == id);
+
+                db.Players.Remove(player);
+                db.SaveChanges();
+            }
+
+            Console.WriteLine("---Test Completed---");
+            ReadAll();
+        }
+        #endregion
+
+        public static void TestDelete() {
+            ReadAll();
+            Console.WriteLine("Select Delete ItemID");
+            Console.Write(">>> ");
+            int id = int.Parse(Console.ReadLine());
+
+            using(AppDbContext db = new AppDbContext()) {
+                Item item = db.Find<Item>(id);
+                //db.Items.Remove(item);
+                item.SoftDeleted = true;
+                db.SaveChanges();
+            }
+
+            Console.WriteLine("Test Delete Completed");
+            ReadAll();
+        }
 
         #endregion
     }

@@ -31,5 +31,17 @@ namespace MMO_EFCore {
         protected override void OnConfiguring(DbContextOptionsBuilder options) {
             options.UseSqlServer(ConnectionString);
         }
+
+        //Entity에 대한 추가 설정 가능한 곳
+        protected override void OnModelCreating(ModelBuilder builder) {
+            //앞으로 Item Entity에 접근할 때 항상 사용되는 모델 레벨의 필터링
+            //필터를 무시하고 싶으면 AppDbContext객체에서 Entity를 접근할 때 IgnoreQueryFilter 옵션을 추가하면 된다.
+            builder.Entity<Item>().HasQueryFilter(i => i.SoftDeleted == false);
+
+            builder.Entity<Player>()
+                            .HasIndex(p => p.Name)
+                            .IsUnique()
+                            .HasName("Index_PersonName");
+        }
     }
 }

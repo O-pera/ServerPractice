@@ -10,8 +10,8 @@ namespace MMO_EFCore {
         const string Index_0 = "Exit";
         const string Index_1 = "ForceReset";
         const string Index_2 = "ReadAll";
-        const string Index_3 = "Explicit";
-        const string Index_4 = "FullUpdate";
+        const string Index_3 = "TestDelete";
+        const string Index_4 = "";
         const string Index_5 = "";
         const string Index_6 = "";
         const string Index_7 = "";
@@ -44,8 +44,8 @@ namespace MMO_EFCore {
                     case 0:  loop = false;                                  break;
                     case 1:  DbCommands.InitializeDB(forceReset: true);     break;
                     case 2:  DbCommands.ReadAll();                          break;
-                    case 3:  DbCommands.Explicit();                            break;
-                    case 4:  DbCommands.UpdateFull();                         break;
+                    case 3:  DbCommands.TestDelete();                        break;
+                    //case 4:  DbCommands.Update1vM();                        break;
                     //case 5:  DbCommands.Select();                           break;
                 }
 
